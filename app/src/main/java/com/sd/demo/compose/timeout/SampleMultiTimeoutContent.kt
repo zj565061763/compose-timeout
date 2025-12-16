@@ -52,8 +52,10 @@ private fun Content(
     }
     MultiTimeoutContent(
       type,
-      initItem = TimeoutContentItem("initItem", 3000),
-      getItem = {
+      getInitItem = {
+        TimeoutContentItem("initItem", 3000)
+      },
+      getKeyItem = {
         when (type) {
           MultiType.T1 -> TimeoutContentItem("T1", 0)
           MultiType.T2 -> TimeoutContentItem("T2", 0)

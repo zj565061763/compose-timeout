@@ -3,7 +3,6 @@ package com.sd.lib.compose.timeout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -13,6 +12,8 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun <T> TimeoutContent(
@@ -50,15 +51,16 @@ class TimeoutContentState<T> {
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
   )
 
-  internal var itemFlowSubscriptionCount by mutableIntStateOf(0)
+  internal var hasTimeoutContentCollector by mutableStateOf(false)
     private set
 
   @Composable
   internal fun Init() {
     LaunchedEffect(Unit) {
-      itemFlow.subscriptionCount.collect { count ->
-        itemFlowSubscriptionCount = count
-      }
+      itemFlow.subscriptionCount
+        .map { it > 0 }
+        .distinctUntilChanged()
+        .collect { hasTimeoutContentCollector = it }
     }
   }
 
