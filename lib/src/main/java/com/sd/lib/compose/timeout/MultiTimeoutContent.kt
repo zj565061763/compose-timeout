@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 
 /**
@@ -18,17 +19,19 @@ fun <T> MultiTimeoutContent(
   getKeyItem: () -> TimeoutContentItem<T>?,
   content: @Composable (T?) -> Unit,
 ) {
-  var isFirst by remember { mutableStateOf(true) }
-
   val state = rememberTimeoutContentState<T>()
   TimeoutContent(state, content)
 
+  var isFirst by remember { mutableStateOf(true) }
+
   if (state.hasTimeoutContentCollector) {
+    val getInitItemUpdated by rememberUpdatedState(getInitItem)
+    val getKeyItemUpdated by rememberUpdatedState(getKeyItem)
     LaunchedEffect(keys = keys) {
-      val keyItem = getKeyItem()
+      val keyItem = getKeyItemUpdated()
       when {
         keyItem != null -> keyItem
-        isFirst -> getInitItem()
+        isFirst -> getInitItemUpdated()
         else -> null
       }.also {
         state.setItem(it)
