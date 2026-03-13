@@ -14,8 +14,10 @@ import kotlinx.coroutines.delay
  * 3. 移除[content]
  */
 @Composable
-fun SingleTimeoutContent(
+inline fun SingleTimeoutContent(
+  /** 显示超时时间（毫秒） */
   timeout: Long,
+  /** 显示内容 */
   content: @Composable () -> Unit,
 ) {
   var show by remember { mutableStateOf(true) }
