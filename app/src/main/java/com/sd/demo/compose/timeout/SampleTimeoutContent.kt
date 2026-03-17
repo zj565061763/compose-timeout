@@ -39,15 +39,15 @@ private fun Content(
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Button(onClick = { state.setContent("1", 3000) }) {
-      Text(text = "1")
+      Text(text = "1(3000)")
     }
 
     Button(onClick = { state.setContent("2", 3000) }) {
-      Text(text = "2")
+      Text(text = "2(3000)")
     }
 
     Button(onClick = { state.setContent("3", 0) }) {
-      Text(text = "3")
+      Text(text = "3(0)")
     }
 
     Button(onClick = { state.clearContent() }) {

@@ -24,19 +24,15 @@ inline fun <T> TimeoutContent(
 fun <T> rememberTimeoutContentState(
   init: TimeoutContentState<T>.() -> Unit = {},
 ): TimeoutContentState<T> {
-  return remember { TimeoutContentState<T>().apply(init) }.also { it.Init() }
+  val coroutineScope = rememberCoroutineScope()
+  return remember { TimeoutContentState<T>(coroutineScope).apply(init) }
 }
 
-class TimeoutContentState<T> {
+class TimeoutContentState<T>(
+  private val coroutineScope: CoroutineScope,
+) {
   val contentFlow = MutableStateFlow<T?>(null)
-
-  private lateinit var _coroutineScope: CoroutineScope
-  private var _itemJob: Job? = null
-
-  @Composable
-  internal fun Init() {
-    _coroutineScope = rememberCoroutineScope()
-  }
+  private var _contentJob: Job? = null
 
   /** 设置内容 */
   fun setContent(content: T, timeout: Long) {
@@ -49,10 +45,10 @@ class TimeoutContentState<T> {
   }
 
   private fun setContentInternal(content: T?, timeout: Long) {
-    _itemJob?.cancel()
+    _contentJob?.cancel()
     contentFlow.value = content
     if (timeout > 0) {
-      _itemJob = _coroutineScope.launch {
+      _contentJob = coroutineScope.launch {
         delay(timeout)
         contentFlow.value = null
       }
