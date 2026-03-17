@@ -24,17 +24,16 @@ fun <T> TimeoutContent(
 
   val lifecycleOwner = LocalLifecycleOwner.current
   LaunchedEffect(state, lifecycleOwner) {
-    state.itemFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
-      .collectLatest { item ->
-        data = item?.data
-        if (item != null) {
-          val timeout = item.timeout
-          if (timeout > 0) {
-            delay(timeout)
-            data = null
-          }
+    state.itemFlow.flowWithLifecycle(lifecycleOwner.lifecycle).collectLatest { item ->
+      data = item?.data
+      if (item != null) {
+        val timeout = item.timeout
+        if (timeout > 0) {
+          delay(timeout)
+          data = null
         }
       }
+    }
   }
 
   content(data)
@@ -51,7 +50,7 @@ class TimeoutContentState<T> {
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
   )
 
-  internal var hasTimeoutContentCollector by mutableStateOf(false)
+  var hasTimeoutContentSubscriber by mutableStateOf(false)
     private set
 
   @Composable
@@ -60,7 +59,7 @@ class TimeoutContentState<T> {
       itemFlow.subscriptionCount
         .map { it > 0 }
         .distinctUntilChanged()
-        .collect { hasTimeoutContentCollector = it }
+        .collect { hasTimeoutContentSubscriber = it }
     }
   }
 

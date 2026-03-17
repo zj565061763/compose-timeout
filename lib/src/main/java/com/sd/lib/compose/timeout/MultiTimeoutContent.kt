@@ -24,7 +24,7 @@ fun <T> MultiTimeoutContent(
 
   var isFirst by remember { mutableStateOf(true) }
 
-  if (state.hasTimeoutContentCollector) {
+  if (state.hasTimeoutContentSubscriber) {
     val getInitItemUpdated by rememberUpdatedState(getInitItem)
     val getKeyItemUpdated by rememberUpdatedState(getKeyItem)
     LaunchedEffect(keys = keys) {
