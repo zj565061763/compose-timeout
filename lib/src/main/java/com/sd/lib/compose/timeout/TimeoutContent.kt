@@ -21,11 +21,9 @@ inline fun <T> TimeoutContent(
 }
 
 @Composable
-fun <T> rememberTimeoutContentState(
-  init: TimeoutContentState<T>.() -> Unit = {},
-): TimeoutContentState<T> {
+fun <T> rememberTimeoutContentState(): TimeoutContentState<T> {
   val coroutineScope = rememberCoroutineScope()
-  return remember { TimeoutContentState<T>(coroutineScope).apply(init) }
+  return remember { TimeoutContentState(coroutineScope) }
 }
 
 class TimeoutContentState<T>(
@@ -34,17 +32,24 @@ class TimeoutContentState<T>(
   val contentFlow = MutableStateFlow<T?>(null)
   private var _contentJob: Job? = null
 
+  private var _isFirst = true
+
   /** 设置内容 */
   fun setContent(content: T, timeout: Long) {
     setContentInternal(content, timeout)
   }
 
-  /** 清空内容 */
-  fun clearContent() {
-    setContentInternal(null, 0)
+  /** 如果还未设置内容则显示首次内容[content]，如果已经设置过内容则清空内容 */
+  fun clearOrSetFirstContent(content: T?, timeout: Long) {
+    if (_isFirst) {
+      setContentInternal(content, timeout)
+    } else {
+      setContentInternal(null, 0)
+    }
   }
 
   private fun setContentInternal(content: T?, timeout: Long) {
+    _isFirst = false
     _contentJob?.cancel()
     contentFlow.value = content
     if (timeout > 0) {

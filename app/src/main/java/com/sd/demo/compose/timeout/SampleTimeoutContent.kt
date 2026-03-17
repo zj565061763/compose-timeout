@@ -30,7 +30,7 @@ class SampleTimeoutContent : ComponentActivity() {
 private fun Content(
   modifier: Modifier = Modifier,
 ) {
-  val state = rememberTimeoutContentState { setContent("init", 5000) }
+  val state = rememberTimeoutContentState<String>()
 
   Column(
     modifier = modifier
@@ -50,8 +50,8 @@ private fun Content(
       Text(text = "3(0)")
     }
 
-    Button(onClick = { state.clearContent() }) {
-      Text(text = "null")
+    Button(onClick = { state.clearOrSetFirstContent("first", 3000) }) {
+      Text(text = "clearOrSetFirstContent")
     }
 
     TimeoutContent(state) { content ->
