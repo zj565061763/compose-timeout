@@ -1,24 +1,13 @@
 package com.sd.lib.compose.timeout
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-
-@Composable
-inline fun <T> TimeoutContent(
-  state: TimeoutContentState<T>,
-  content: @Composable (T) -> Unit,
-) {
-  val timeoutContent by state.contentFlow.collectAsStateWithLifecycle()
-  timeoutContent?.also { content(it) }
-}
 
 @Composable
 fun <T> rememberTimeoutContentState(): TimeoutContentState<T> {
@@ -29,10 +18,11 @@ fun <T> rememberTimeoutContentState(): TimeoutContentState<T> {
 class TimeoutContentState<T>(
   private val coroutineScope: CoroutineScope,
 ) {
-  val contentFlow = MutableStateFlow<T?>(null)
+  private var _isFirst = true
   private var _contentJob: Job? = null
 
-  private var _isFirst = true
+  /** 要显示的内容 */
+  val contentFlow = MutableStateFlow<T?>(null)
 
   /** 设置内容 */
   fun setContent(content: T, timeout: Long) {

@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sd.demo.compose.timeout.theme.AppTheme
-import com.sd.lib.compose.timeout.TimeoutContent
 import com.sd.lib.compose.timeout.rememberTimeoutContentState
 
 class SampleTimeoutContent : ComponentActivity() {
@@ -31,6 +32,7 @@ private fun Content(
   modifier: Modifier = Modifier,
 ) {
   val state = rememberTimeoutContentState<String>()
+  val stateContent by state.contentFlow.collectAsStateWithLifecycle()
 
   Column(
     modifier = modifier
@@ -54,7 +56,7 @@ private fun Content(
       Text(text = "clearOrSetFirstContent")
     }
 
-    TimeoutContent(state) { content ->
+    stateContent?.also { content ->
       Text(text = content)
     }
   }
