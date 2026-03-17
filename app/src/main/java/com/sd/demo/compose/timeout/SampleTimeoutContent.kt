@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import com.sd.demo.compose.timeout.theme.AppTheme
 import com.sd.lib.compose.timeout.TimeoutContent
 import com.sd.lib.compose.timeout.rememberTimeoutContentState
-import com.sd.lib.compose.timeout.setItem
 
 class SampleTimeoutContent : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,20 +30,32 @@ class SampleTimeoutContent : ComponentActivity() {
 private fun Content(
   modifier: Modifier = Modifier,
 ) {
-  val state = rememberTimeoutContentState<String>()
+  val state = rememberTimeoutContentState { setContent("init", 5000) }
+
   Column(
     modifier = modifier
       .fillMaxSize()
       .safeContentPadding(),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    Button(onClick = { state.setItem("click", 2000) }) {
-      Text(text = "click")
+    Button(onClick = { state.setContent("1", 3000) }) {
+      Text(text = "1")
     }
-    TimeoutContent(state) { data ->
-      if (data != null) {
-        Text(text = data)
-      }
+
+    Button(onClick = { state.setContent("2", 3000) }) {
+      Text(text = "2")
+    }
+
+    Button(onClick = { state.setContent("3", 0) }) {
+      Text(text = "3")
+    }
+
+    Button(onClick = { state.clearContent() }) {
+      Text(text = "null")
+    }
+
+    TimeoutContent(state) { content ->
+      Text(text = content)
     }
   }
 }

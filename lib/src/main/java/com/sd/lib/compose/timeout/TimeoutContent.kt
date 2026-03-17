@@ -1,75 +1,61 @@
 package com.sd.lib.compose.timeout
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.flowWithLifecycle
-import kotlinx.coroutines.channels.BufferOverflow
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @Composable
-fun <T> TimeoutContent(
+inline fun <T> TimeoutContent(
   state: TimeoutContentState<T>,
-  content: @Composable (T?) -> Unit,
+  content: @Composable (T) -> Unit,
 ) {
-  var data by remember { mutableStateOf<T?>(null) }
-
-  val lifecycleOwner = LocalLifecycleOwner.current
-  LaunchedEffect(state, lifecycleOwner) {
-    state.itemFlow.flowWithLifecycle(lifecycleOwner.lifecycle).collectLatest { item ->
-      data = item?.data
-      if (item != null) {
-        val timeout = item.timeout
-        if (timeout > 0) {
-          delay(timeout)
-          data = null
-        }
-      }
-    }
-  }
-
-  content(data)
+  val timeoutContent by state.contentFlow.collectAsStateWithLifecycle()
+  timeoutContent?.also { content(it) }
 }
 
 @Composable
-fun <T> rememberTimeoutContentState(): TimeoutContentState<T> {
-  return remember { TimeoutContentState<T>() }.also { it.Init() }
+fun <T> rememberTimeoutContentState(
+  init: TimeoutContentState<T>.() -> Unit = {},
+): TimeoutContentState<T> {
+  return remember { TimeoutContentState<T>().apply(init) }.also { it.Init() }
 }
 
 class TimeoutContentState<T> {
-  internal val itemFlow = MutableSharedFlow<TimeoutContentItem<T>?>(
-    extraBufferCapacity = 1,
-    onBufferOverflow = BufferOverflow.DROP_OLDEST,
-  )
+  val contentFlow = MutableStateFlow<T?>(null)
 
-  var hasTimeoutContentSubscriber by mutableStateOf(false)
-    private set
+  private lateinit var _coroutineScope: CoroutineScope
+  private var _itemJob: Job? = null
 
   @Composable
   internal fun Init() {
-    LaunchedEffect(Unit) {
-      itemFlow.subscriptionCount
-        .map { it > 0 }
-        .distinctUntilChanged()
-        .collect { hasTimeoutContentSubscriber = it }
+    _coroutineScope = rememberCoroutineScope()
+  }
+
+  /** 设置内容 */
+  fun setContent(content: T, timeout: Long) {
+    setContentInternal(content, timeout)
+  }
+
+  /** 清空内容 */
+  fun clearContent() {
+    setContentInternal(null, 0)
+  }
+
+  private fun setContentInternal(content: T?, timeout: Long) {
+    _itemJob?.cancel()
+    contentFlow.value = content
+    if (timeout > 0) {
+      _itemJob = _coroutineScope.launch {
+        delay(timeout)
+        contentFlow.value = null
+      }
     }
   }
-
-  /** 设置内容项 */
-  fun setItem(item: TimeoutContentItem<T>?) {
-    itemFlow.tryEmit(item)
-  }
-}
-
-/** 设置内容项 */
-fun <T> TimeoutContentState<T>.setItem(data: T, timeout: Long) {
-  setItem(TimeoutContentItem(data, timeout))
 }

@@ -2,32 +2,31 @@ package com.sd.lib.compose.timeout
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 
-/**
- * 1. 显示[content]
- * 2. 延迟[timeout]
- * 3. 移除[content]
- */
 @Composable
-inline fun SingleTimeoutContent(
-  /** 显示超时时间（毫秒） */
+inline fun TimeoutContent(
   timeout: Long,
-  /** 显示内容 */
   content: @Composable () -> Unit,
 ) {
-  var show by remember { mutableStateOf(true) }
-
-  LaunchedEffect(Unit) {
-    delay(timeout)
-    show = false
-  }
-
-  if (show) {
+  val isTimeout by rememberTimeout(timeout)
+  if (isTimeout) {
+    // 超时
+  } else {
     content()
   }
+}
+
+@Composable
+fun rememberTimeout(timeout: Long): State<Boolean> {
+  val isTimeout = remember { mutableStateOf(false) }
+  LaunchedEffect(Unit) {
+    delay(timeout)
+    isTimeout.value = true
+  }
+  return isTimeout
 }

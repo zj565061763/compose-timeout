@@ -26,9 +26,8 @@ class MainActivity : ComponentActivity() {
       AppTheme {
         Content(
           listActivity = listOf(
+            SampleRememberTimeout::class.java,
             SampleTimeoutContent::class.java,
-            SampleMultiTimeoutContent::class.java,
-            SampleSingleTimeoutContent::class.java,
           ),
           onClickActivity = {
             startActivity(Intent(this, it))

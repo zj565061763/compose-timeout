@@ -22,9 +22,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SampleRememberTimeout" />
         <activity android:name=".SampleTimeoutContent" />
-        <activity android:name=".SampleMultiTimeoutContent" />
-        <activity android:name=".SampleSingleTimeoutContent" />
 
     </application>
 
