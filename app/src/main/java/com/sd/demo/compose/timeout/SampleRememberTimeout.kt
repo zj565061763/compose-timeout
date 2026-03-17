@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.sd.demo.compose.timeout.theme.AppTheme
-import com.sd.lib.compose.timeout.TimeoutContent
+import com.sd.lib.compose.timeout.rememberTimeoutContent
 
 class SampleRememberTimeout : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ private fun Content(
       .safeContentPadding(),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    TimeoutContent(3000) {
+    rememberTimeoutContent(3000) {
       Text(text = "content")
     }
   }

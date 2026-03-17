@@ -3,21 +3,21 @@ package com.sd.lib.compose.timeout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.delay
 
 @Composable
-inline fun TimeoutContent(
+inline fun rememberTimeoutContent(
   timeout: Long,
   content: @Composable () -> Unit,
-) {
-  val isTimeout by rememberTimeout(timeout)
-  if (isTimeout) {
-    // 超时
-  } else {
-    content()
+): State<Boolean> {
+  return rememberTimeout(timeout).also {
+    if (it.value) {
+      // 超时
+    } else {
+      content()
+    }
   }
 }
 
